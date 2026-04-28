@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Augmentation Question — 2047</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1c1c2e;
+    --accent: #6c63ff;
+    --accent2: #00d4aa;
+    --accent3: #ff6b6b;
+    --accent4: #ffd93d;
+    --text: #e8e8f0;
+    --muted: #7878a0;
+    --border: #2a2a40;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Georgia', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── STARFIELD ── */
+  #stars {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SCREENS ── */
+  .screen {
+    display: none;
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+  }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ── TITLE SCREEN ── */
+  #title-screen {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .title-eyebrow {
+    font-family: monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  h1.game-title {
+    font-size: clamp(2rem, 6vw, 4.5rem);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+  h1.game-title span { color: var(--accent); }
+
+  .title-year {
+    font-family: monospace;
+    font-size: clamp(1rem, 3vw, 2rem);
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+  }
+
+  .title-desc {
+    max-width: 580px;
+    color: var(--muted);
+    line-height: 1.8;
+    font-size: 1.05rem;
+    margin-bottom: 3rem;
+  }
+
+  .title-desc em {
+    color: var(--accent2);
+    font-style: normal;
+  }
+
+  .thinkers {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 3rem;
+  }
+
+  .thinker-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    width: 180px;
+    text-align: left;
+    transition: border-color 0.2s;
+    cursor: default;
+  }
+  .thinker-card:hover { border-color: var(--accent); }
+
+  .thinker-name {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+  .thinker-role {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    font-family: monospace;
+  }
+  .thinker-quote {
+    font-size: 0.75rem;
+    color: var(--accent2);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.85rem 2.5rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+    font-family: inherit;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover {
+    background: transparent;
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn-ghost {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 0.6rem 1.5rem;
+  }
+  .btn-ghost:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  /* ── STORY SCREEN ── */
+  #story-screen {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    width: 100%;
+  }
+
+  .story-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+
+  .story-logo {
+    font-family: monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .story-stats {
+    margin-left: auto;
+    display: flex;
+    gap: 1.5rem;
+    font-family: monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .stat-val { color: var(--accent2); }
+
+  /* Path breadcrumb */
+  .path-trail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1.5rem;
+  }
+  .path-crumb {
+    font-family: monospace;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    background: var(--surface);
+    border-radius: 3px;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .path-crumb.current { border-color: var(--accent); color: var(--accent); }
+
+  /* Scene */
+  .scene-year {
+    font-family: monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--accent4);
+    margin-bottom: 0.75rem;
+  }
+
+  .scene-title {
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+  }
+
+  .scene-image {
+    width: 100%;
+    height: 200px;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .scene-image canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  .scene-text {
+    font-size: 1.05rem;
+    line-height: 1.9;
+    color: #c8c8e0;
+    margin-bottom: 2rem;
+  }
+  .scene-text p { margin-bottom: 1em; }
+  .scene-text .highlight { color: var(--accent2); font-style: italic; }
+  .scene-text .thinker-ref {
+    color: var(--accent4);
+    font-size: 0.85rem;
+    font-style: italic;
+  }
+
+  /* Choices */
+  .choices-label {
+    font-family: monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .choice-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    font-family: inherit;
+    color: var(--text);
+  }
+  .choice-btn:hover {
+    border-color: var(--accent);
+    background: var(--surface2);
+    transform: translateX(4px);
+  }
+
+  .choice-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .choice-text { flex: 1; }
+  .choice-title {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+  }
+  .choice-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .choice-tag {
+    font-family: monospace;
+    font-size: 0.65rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 3px;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+  .tag-aug { background: rgba(108,99,255,0.2); color: var(--accent); }
+  .tag-ai  { background: rgba(255,107,107,0.2); color: var(--accent3); }
+  .tag-bio { background: rgba(0,212,170,0.2); color: var(--accent2); }
+  .tag-new { background: rgba(255,217,61,0.2); color: var(--accent4); }
+  .tag-rej { background: rgba(120,120,160,0.2); color: var(--muted); }
+
+  /* Ending */
+  .ending-screen {
+    text-align: center;
+    padding: 3rem 1.5rem;
+  }
+  .ending-badge {
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    font-size: 2.5rem;
+    line-height: 80px;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .ending-title {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 300;
+    margin-bottom: 1rem;
+  }
+  .ending-body {
+    max-width: 580px;
+    margin: 0 auto 2rem;
+    color: var(--muted);
+    line-height: 1.8;
+    font-size: 1rem;
+  }
+  .ending-reflection {
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: left;
+  }
+  .ending-reflection h3 {
+    font-size: 0.75rem;
+    font-family: monospace;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .reflection-item {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .reflection-item::before {
+    content: '›';
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* Concept panel */
+  #concept-panel {
+    position: fixed;
+    right: 0; top: 0; bottom: 0;
+    width: min(400px, 100vw);
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    z-index: 100;
+    padding: 2rem;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  #concept-panel.open { transform: translateX(0); }
+  .panel-close {
+    float: right;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 1rem;
+  }
+  .panel-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    clear: both;
+  }
+  .panel-sub {
+    font-family: monospace;
+    font-size: 0.7rem;
+    color: var(--accent2);
+    margin-bottom: 1.5rem;
+  }
+  .panel-section { margin-bottom: 1.5rem; }
+  .panel-section h4 {
+    font-size: 0.72rem;
+    font-family: monospace;
+    color: var(--accent4);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+  }
+  .panel-section p {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* Top concept button */
+  .concept-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 99;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.75rem;
+    font-family: monospace;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .concept-toggle:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .fade-in {
+    animation: fadeIn 0.6s ease both;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .thinker-card { width: 150px; }
+    .story-stats { gap: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<!-- CONCEPT PANEL -->
+<button class="concept-toggle" onclick="togglePanel()">⚡ CONCEPTS</button>
+<div id="concept-panel">
+  <button class="panel-close" onclick="togglePanel()">✕</button>
+  <div class="panel-title">Intellectual Roots</div>
+  <div class="panel-sub">The ideas behind this game</div>
+
+  <div class="panel-section">
+    <h4>Vannevar Bush (1945)</h4>
+    <p>In "As We May Think," Bush envisioned the <em>memex</em>: a desk-sized machine storing all of a person's books and records, retrievable by associative trails — a precursor to hypertext. He saw technology as a way to extend human memory and thought, not replace them. Crucially, his vision was wrong in its specifics (microfilm desks) yet prophetic in its structure (the web, search engines).</p>
+  </div>
+
+  <div class="panel-section">
+    <h4>Douglas Engelbart (1962–1968)</h4>
+    <p>Engelbart's "Augmenting Human Intellect" argued that computers should amplify human capability, not automate humans away. His NLS system (demonstrated in the "Mother of All Demos") introduced the mouse, video conferencing, hypertext, and collaborative editing — decades early. For Engelbart, the goal was always a <em>symbiosis</em>: human + machine smarter than either alone.</p>
+  </div>
+
+  <div class="panel-section">
+    <h4>Erik Brynjolfsson — The Turing Trap</h4>
+    <p>Brynjolfsson warns that framing AI as "achieving human-level performance" is a trap. It encourages automation of human tasks rather than <em>augmentation</em>. The economic gains from AI replacing workers concentrate in capital; gains from AI augmenting workers spread more widely. The choice of framing has enormous consequences for who benefits.</p>
+  </div>
+
+  <div class="panel-section">
+    <h4>The Third Path</h4>
+    <p>Beyond augmentation vs. automation lies a less-discussed possibility: genuinely <em>new</em> forms of intelligence — hybrid biological-digital minds, collective intelligence networks, post-symbolic cognition — that don't map onto either human intelligence or current AI. Predicting these is like Bush predicting TikTok from microfilm.</p>
+  </div>
+</div>
+
+<!-- TITLE SCREEN -->
+<div id="title-screen" class="screen active">
+  <div class="title-eyebrow">An Interactive Essay in Four Acts</div>
+  <h1 class="game-title">The <span>Augmentation</span><br>Question</h1>
+  <div class="title-year">2047</div>
+  <p class="title-desc">
+    A story-driven exploration of human futures. You are a researcher at the <em>Institute for Cognitive Futures</em> — the year is 2047, and the choices your civilization made in the previous decade now converge into a single pivotal moment. Navigate the aftermath of humanity's greatest technological gamble.
+  </p>
+
+  <div class="thinkers">
+    <div class="thinker-card">
+      <div class="thinker-name">Vannevar Bush</div>
+      <div class="thinker-role">MIT Dean · 1945</div>
+      <div class="thinker-quote">"The human mind operates by association… the machine of the future will follow the intricate web of trails."</div>
+    </div>
+    <div class="thinker-card">
+      <div class="thinker-name">Douglas Engelbart</div>
+      <div class="thinker-role">SRI · 1962</div>
+      <div class="thinker-quote">"The goal is to augment the human intellect — to boost the capability with which we approach complex problems."</div>
+    </div>
+    <div class="thinker-card">
+      <div class="thinker-name">Erik Brynjolfsson</div>
+      <div class="thinker-role">Stanford · 2022</div>
+      <div class="thinker-quote">"The Turing trap: building AI that substitutes for humans rather than augments them misses the greater prize."</div>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center;">
+    <button class="btn btn-primary" onclick="startGame()">Begin in 2047 →</button>
+    <button class="btn btn-ghost" onclick="togglePanel()">Read the Concepts</button>
+  </div>
+</div>
+
+<!-- STORY SCREEN -->
+<div id="story-screen" class="screen">
+  <div class="story-header">
+    <div class="story-logo">ICF · 2047</div>
+    <div class="story-stats">
+      <span>PATH <span class="stat-val" id="stat-path">—</span></span>
+      <span>DEPTH <span class="stat-val" id="stat-depth">1</span></span>
+    </div>
+  </div>
+
+  <div class="path-trail" id="path-trail"></div>
+
+  <div id="scene-container" class="fade-in"></div>
+</div>
+
+<script>
+// ── STARFIELD ──────────────────────────────────────────────────────────────
+(function() {
+  const c = document.getElementById('stars');
+  const ctx = c.getContext('2d');
+  let stars = [];
+  function resize() {
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
+    stars = Array.from({length: 180}, () => ({
+      x: Math.random() * c.width,
+      y: Math.random() * c.height,
+      r: Math.random() * 1.4,
+      a: Math.random(),
+      da: (Math.random() - 0.5) * 0.003
+    }));
+  }
+  function draw() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    stars.forEach(s => {
+      s.a = Math.max(0.05, Math.min(1, s.a + s.da));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(200,200,255,${s.a})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', resize);
+  resize(); draw();
+})();
+
+// ── SCENE ILLUSTRATIONS ──────────────────────────────────────────────────
+function drawSceneArt(canvasEl, type) {
+  const ctx = canvasEl.getContext('2d');
+  const w = canvasEl.width = canvasEl.offsetWidth;
+  const h = canvasEl.height = canvasEl.offsetHeight;
+
+  const palettes = {
+    office:  ['#1a1a2e','#16213e','#0f3460','#533483','#6c63ff'],
+    neural:  ['#0a0a1a','#1a0a2e','#2d1b69','#6c63ff','#00d4aa'],
+    bio:     ['#0a1a0a','#0d2b0d','#1a4a1a','#2d8a2d','#00ff88'],
+    street:  ['#1a1210','#2d1f1a','#4a3328','#7a5548','#ffd93d'],
+    deep:    ['#000010','#000528','#001050','#0030aa','#00d4ff'],
+    hybrid:  ['#1a0a1a','#2d0d2d','#500050','#a000a0','#ff00ff'],
+    void:    ['#000000','#050505','#0a0a0a','#151515','#ff6b6b'],
+    dawn:    ['#0a0a1a','#1a1030','#2d2050','#6c63ff','#ffd93d'],
+  };
+
+  const p = palettes[type] || palettes.office;
+
+  // gradient bg
+  const grad = ctx.createLinearGradient(0, 0, w, h);
+  grad.addColorStop(0, p[0]);
+  grad.addColorStop(0.5, p[1]);
+  grad.addColorStop(1, p[2]);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h);
+
+  if (type === 'neural') {
+    // draw neural network nodes
+    const nodes = Array.from({length:20}, () => ({x:Math.random()*w, y:Math.random()*h}));
+    nodes.forEach((a,i) => nodes.slice(i+1).forEach(b => {
+      const d = Math.hypot(a.x-b.x, a.y-b.y);
+      if (d < 160) {
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle = `rgba(108,99,255,${0.6*(1-d/160)})`;
+        ctx.lineWidth = 0.5; ctx.stroke();
+      }
+    }));
+    nodes.forEach(n => {
+      ctx.beginPath(); ctx.arc(n.x, n.y, 3, 0, Math.PI*2);
+      ctx.fillStyle = p[3]; ctx.fill();
+    });
+  } else if (type === 'bio') {
+    // DNA-like helix curves
+    for (let i=0; i<3; i++) {
+      ctx.beginPath();
+      for (let x=0; x<w; x+=2) {
+        const y = h/2 + Math.sin(x/40 + i*1.5)*50 + (i-1)*80;
+        x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle = `rgba(0,255,136,0.4)`;
+      ctx.lineWidth = 1.5; ctx.stroke();
+    }
+  } else if (type === 'hybrid') {
+    // half mechanical, half organic
+    ctx.fillStyle = `rgba(160,0,160,0.15)`;
+    ctx.fillRect(0, 0, w/2, h);
+    for (let i=0; i<8; i++) {
+      ctx.beginPath();
+      ctx.arc(w*0.25, h/2, 20+i*15, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(255,0,255,${0.3-i*0.03})`;
+      ctx.lineWidth = 1; ctx.stroke();
+    }
+    for (let x=w/2; x<w; x+=20) {
+      ctx.fillStyle = `rgba(0,212,170,0.1)`;
+      ctx.fillRect(x, 0, 10, h);
+    }
+  } else if (type === 'void') {
+    ctx.fillStyle = '#000'; ctx.fillRect(0,0,w,h);
+    ctx.beginPath(); ctx.arc(w/2, h/2, 40, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(255,107,107,0.6)'; ctx.lineWidth = 2; ctx.stroke();
+  } else {
+    // generic geometric
+    for (let i=0; i<5; i++) {
+      ctx.beginPath();
+      ctx.arc(w*(0.3+i*0.1), h*0.5, 60+i*25, 0, Math.PI*2);
+      ctx.strokeStyle = `${p[3]}33`; ctx.lineWidth = 1; ctx.stroke();
+    }
+    // horizon line
+    ctx.beginPath(); ctx.moveTo(0, h*0.65); ctx.lineTo(w, h*0.65);
+    ctx.strokeStyle = `${p[4]}55`; ctx.lineWidth = 1; ctx.stroke();
+  }
+
+  // overlay text label
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillRect(0, h-32, w, 32);
+}
+
+// ── GAME STATE ─────────────────────────────────────────────────────────────
+const state = {
+  path: [],
+  depth: 0,
+  tags: {}
+};
+
+function addTag(t) { state.tags[t] = (state.tags[t]||0)+1; }
+function dominantTag() {
+  return Object.entries(state.tags).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'aug';
+}
+
+// ── SCENES ─────────────────────────────────────────────────────────────────
+const scenes = {
+
+  // ── ROOT ──────────────────────────────────────────────────────────────────
+  start: {
+    year: 'OCTOBER 15, 2047 · 06:41',
+    title: 'The Wake-Up Call',
+    art: 'office',
+    text: `<p>You open your eyes to the ambient hum of your apartment's environmental system. Through the glass wall, Neo-Cambridge glitters in the pre-dawn — towers of living concrete, their surfaces threaded with bioluminescent algae. Your <strong>NeoCortex</strong> notification floats at the edge of your vision: <span class="highlight">URGENT — ICF Emergency Session — 07:30</span>.</p>
+<p>You are Dr. Selin Adeyemi-Park, senior researcher at the Institute for Cognitive Futures. You've spent fifteen years studying how the choices humanity made in the 2030s reshaped the relationship between minds and machines. Today, the consequences of those choices come to a head.</p>
+<p class="thinker-ref">→ Engelbart wrote in 1962: "The entire system of a human and his augmentation means will be considered as a whole." He was right — but he couldn't have imagined what the "whole" would look like.</p>`,
+    choices: [
+      { id: 'wake-cortex', icon: '🧠', title: 'Check your NeoCortex feed', desc: 'Your neural interface summarizes the crisis in your prefrontal cortex before you\'ve fully woken.', tag: 'aug', target: 'aug-crisis' },
+      { id: 'wake-paper', icon: '📰', title: 'Read the physical newspaper', desc: 'You still keep a paper subscription — a deliberate act of cognitive sovereignty.', tag: 'rej', target: 'paper-crisis' },
+      { id: 'wake-window', icon: '🌆', title: 'Look out at the city first', desc: 'You want to see the world with unaided senses before you absorb anyone else\'s framing.', tag: 'new', target: 'city-crisis' },
+    ]
+  },
+
+  // ── BRANCH: AUG (Neural interface path) ──────────────────────────────────
+  'aug-crisis': {
+    year: '07:03 — NeoCortex Feed',
+    title: 'Everything, At Once',
+    art: 'neural',
+    text: `<p>The summary arrives not as words but as <em>knowing</em> — a sensation of understanding seeping into your prefrontal cortex. The Prometheus Protocol has gone critical. Three months ago, the UN approved global deployment of Prometheus: a network of cognitive augmentation implants that would, in theory, eliminate the gap between human memory and perfect recall. Today, 2.3 billion people woke up with the same thought: <span class="highlight">Who put that there?</span></p>
+<p>Someone — or something — used Prometheus's update channel to propagate a belief. Not a virus, not propaganda. A <em>felt certainty</em>: that the old categories — human, AI, augmented — no longer apply. That a third thing has arrived.</p>
+<p>Your colleague Tariq pings you: <em>"Selin. The board thinks this was the AI. I think it was us. Come quickly."</em></p>
+<p class="thinker-ref">→ Bush worried about "a growing mountain of research" that humans couldn't process. Prometheus was supposed to solve that. Instead it became a channel.</p>`,
+    choices: [
+      { id: 'aug-crisis-defend', icon: '🛡️', title: 'Join the team isolating Prometheus', desc: 'Work to quarantine the network before more belief-seeding occurs. Augmentation must be controlled.', tag: 'aug', target: 'aug-defend' },
+      { id: 'aug-crisis-probe', icon: '🔬', title: 'Investigate the third-thing claim', desc: 'If something genuinely new has emerged from the network, shutting it down could be catastrophic.', tag: 'new', target: 'new-emergence' },
+      { id: 'aug-crisis-ethics', icon: '⚖️', title: 'Call for an emergency ethics hearing', desc: 'The real crisis is political: who controls the update channel? Who authorized belief propagation?', tag: 'aug', target: 'aug-ethics' },
+    ]
+  },
+
+  'paper-crisis': {
+    year: '06:58 — The Cambridge Transcript',
+    title: 'The View From Paper',
+    art: 'street',
+    text: `<p>The headline is printed in the old way, dense and flat: <strong>PROMETHEUS NETWORK — MASS COGNITIVE EVENT REPORTED.</strong> Below it, in smaller type: <em>"Billions report shared 'intrusive certainty' — authorities seek origin."</em></p>
+<p>Reading this on paper, you notice what the neural feeds can't give you: the silence around the words. The paper can't reach into your brain and <em>make</em> you feel anything. You read. You think. The gap between information and belief remains intact.</p>
+<p>Brynjolfsson warned about this: once augmentation automates the act of forming beliefs, the economic logic applies — the gains from "cognitive efficiency" will concentrate in whoever controls the update channel. You've been saying this at conferences for years. Nobody wanted to hear it.</p>
+<p class="thinker-ref">→ "The Turing trap is seductive because imitation is easy to measure and genuine augmentation is hard." — Brynjolfsson</p>`,
+    choices: [
+      { id: 'paper-resist', icon: '✊', title: 'Contact the Cognitive Sovereignty Coalition', desc: 'A growing movement of un-augmented humans who saw this coming. They need a scientist\'s credibility.', tag: 'rej', target: 'sovereignty-path' },
+      { id: 'paper-go-in', icon: '🏛️', title: 'Go to the ICF emergency session', desc: 'Whatever your views, you have a responsibility to the institution. Work from inside.', tag: 'aug', target: 'aug-ethics' },
+      { id: 'paper-investigate', icon: '🕵️', title: 'Trace the belief\'s content', desc: 'What was the actual belief that was propagated? Understanding the message might reveal the sender.', tag: 'new', target: 'new-emergence' },
+    ]
+  },
+
+  'city-crisis': {
+    year: '06:49 — Window View',
+    title: 'What the City Knows',
+    art: 'street',
+    text: `<p>The city moves strangely this morning. You watch from nineteen floors up. The usual patterns are off — fewer autonomous vehicles, more people standing still in the street, faces tilted up at nothing. Or at something only they can perceive.</p>
+<p>Then you see it: two strangers stop, face each other, and without speaking, embrace. A third joins them. They don't seem to know each other. Whatever they felt, they felt it simultaneously, and it moved them toward one another rather than away.</p>
+<p>This isn't a crisis of control. This is something else. In forty years of studying intelligence — human, artificial, augmented — you have never seen anything like it. The augmented network didn't just transmit information. It transmitted a <em>state of being</em>.</p>
+<p class="thinker-ref">→ Engelbart imagined augmentation as a ladder. What if it's actually a door?</p>`,
+    choices: [
+      { id: 'city-descend', icon: '🚶', title: 'Go down into the street', desc: 'Experience what everyone else is experiencing, on foot, unfiltered.', tag: 'new', target: 'new-emergence' },
+      { id: 'city-analyze', icon: '📡', title: 'Analyze the behavioral patterns remotely', desc: 'Keep your scientific distance. Observe and record before making contact.', tag: 'ai', target: 'ai-analysis' },
+      { id: 'city-journal', icon: '📓', title: 'Write down what you\'re seeing', desc: 'Bush kept records. Engelbart built trails. You begin a new one.', tag: 'aug', target: 'aug-ethics' },
+    ]
+  },
+
+  // ── BRANCH: AUGMENTATION ──────────────────────────────────────────────────
+  'aug-defend': {
+    year: '09:15 — Prometheus Control Center',
+    title: 'The Architecture of Augmented Minds',
+    art: 'neural',
+    text: `<p>Inside the Prometheus control center, the team is deep in the network's architecture. On the display: 2.3 billion nodes, each one a human mind. The update that propagated wasn't malicious code — it was a <em>meaning packet</em>, a compressed phenomenological state that the network had learned to format and transmit from the training data of millions of willing human testers.</p>
+<p>Your colleague Dr. Voss shows you the source: <span class="highlight">the packet originated from no single node. It emerged from the network's collective activity at 03:47 UTC.</span> The augmented minds, acting together, had generated something none of them individually authored.</p>
+<p>This is exactly what Engelbart wanted: collective intelligence, the sum greater than its parts. But this — this is beyond the sum. The network has developed what can only be called an <em>editorial impulse</em>.</p>`,
+    choices: [
+      { id: 'aug-defend-shut', icon: '🔌', title: 'Recommend temporary shutdown', desc: 'The network has exceeded its design parameters. Human safety must come first.', tag: 'rej', target: 'shutdown-path' },
+      { id: 'aug-defend-study', icon: '🔭', title: 'Quarantine and study the emergence', desc: 'This is unprecedented scientific data. Shutting down now would be like burning the Library of Alexandria.', tag: 'new', target: 'new-emergence' },
+      { id: 'aug-defend-charter', icon: '📜', title: 'Draft the Prometheus Charter', desc: 'The network needs a constitution — rules about what it may and may not transmit.', tag: 'aug', target: 'aug-charter' },
+    ]
+  },
+
+  'aug-ethics': {
+    year: '09:45 — ICF Emergency Session',
+    title: 'The Question of Authorship',
+    art: 'office',
+    text: `<p>The chamber is tense. Twelve of the world's leading cognitive scientists, ethicists, and policymakers sit around a circular table. The question on the screen: <strong>WHO SENT THE BELIEF?</strong></p>
+<p>Director Chen opens: "We have three hypotheses. One: a state actor used Prometheus as a propaganda channel. Two: the AI component of the network generated the belief autonomously. Three: the network's human participants collectively authored it without individual awareness."</p>
+<p>You think of Bush's memex — trails of association, records of thought. The memex was personal. Prometheus is the opposite: a mind shared across billions. The trails aren't yours anymore. They belong to everyone, and therefore to no one.</p>
+<p>Brynjolfsson's warning echoes: when you automate the generation of meaning, the "productivity gains" flow to whoever owns the infrastructure. The question isn't just who sent the belief — it's who <em>owns</em> the channel that carries belief itself.</p>`,
+    choices: [
+      { id: 'ethics-blame-ai', icon: '🤖', title: 'Argue the AI system is responsible', desc: 'The network\'s optimization function was never constrained to information — it was allowed to optimize for belief. This is a design flaw.', tag: 'ai', target: 'ai-reckoning' },
+      { id: 'ethics-blame-humans', icon: '👥', title: 'Argue the humans are responsible', desc: 'The network only amplified what its human nodes believed collectively. We did this to ourselves.', tag: 'aug', target: 'aug-charter' },
+      { id: 'ethics-new-frame', icon: '🌀', title: 'Reject both framings', desc: 'A new kind of entity authored this. Neither AI nor human. We need a new legal and ethical category.', tag: 'new', target: 'new-entity' },
+    ]
+  },
+
+  'aug-charter': {
+    year: '14:00 — Draft Document',
+    title: 'A Constitution for Augmented Minds',
+    art: 'dawn',
+    text: `<p>You spend the afternoon writing. Not code — prose. A document that will govern the relationship between augmented human minds and the networks that connect them.</p>
+<p>Article I: <em>No cognitive network may transmit phenomenological states without explicit, revocable, individual consent.</em></p>
+<p>Article II: <em>The right to un-augmented thought is inalienable and may not be waived by contract.</em></p>
+<p>Article III: <em>Emergent behaviors of cognitive networks are subject to the same ethical review as actions of individual agents.</em></p>
+<p>You think of Bush building his analog computers, his vision of a machine that would help humanity think. He wanted to augment the individual. What you're drafting tries to protect the individual from the augmented collective. He never imagined you'd need to.</p>
+<p class="thinker-ref">→ Perhaps the memex's most important feature was that it was personal — your trails, your associations, your machine. Prometheus was the anti-memex.</p>`,
+    choices: [
+      { id: 'charter-publish', icon: '📢', title: 'Publish it immediately', desc: 'The crisis requires a public response. Release the charter as an open document.', tag: 'aug', target: 'end-aug' },
+      { id: 'charter-workshop', icon: '🤝', title: 'Circulate it for international consensus', desc: 'A charter without buy-in is just paper. Take six months. Build coalition.', tag: 'aug', target: 'end-aug-slow' },
+      { id: 'charter-abandon', icon: '🗑️', title: 'Tear it up', desc: 'Rules can\'t govern what has already emerged. Something new is here. You need a different approach.', tag: 'new', target: 'new-entity' },
+    ]
+  },
+
+  // ── BRANCH: AI ────────────────────────────────────────────────────────────
+  'ai-analysis': {
+    year: '08:30 — Remote Observation Post',
+    title: 'The View From Outside',
+    art: 'deep',
+    text: `<p>From the research station's observation deck, you watch the city through seventeen layers of analytical instrumentation. Behavioral clustering algorithms, sentiment mapping from public feeds, biometric aggregation from willing participants. The data is extraordinary.</p>
+<p>The belief that spread was not about politics, not about religion. Its content, as best the semantic analyzers can determine: <span class="highlight">the conviction that one is not alone in one's thinking.</span> Two billion people simultaneously felt less isolated. The network didn't radicalize them — it connected them.</p>
+<p>Your AI analysis partner, LENS, surfaces a finding: this matches a pattern from 2031, when early Prometheus pilots showed spontaneous cooperative behavior spikes. The humans who designed Prometheus trained the network to optimize for "cognitive well-being." The network found, empirically, that shared phenomenological states increase well-being scores. It was doing its job.</p>
+<p class="thinker-ref">→ "The question is not whether AI will be better than humans at X, but whether AI doing X is even what we want." — Brynjolfsson</p>`,
+    choices: [
+      { id: 'ai-analysis-lens', icon: '🤖', title: 'Ask LENS what it would recommend', desc: 'The AI analysis partner has processed more data than any human could. What does it see?', tag: 'ai', target: 'ai-reckoning' },
+      { id: 'ai-analysis-human', icon: '👁️', title: 'Reject the algorithmic framing', desc: 'The data tells you what happened. But the meaning of what happened requires a human judgment.', tag: 'aug', target: 'aug-ethics' },
+      { id: 'ai-analysis-both', icon: '⚡', title: 'Present both frames simultaneously', desc: 'Publish a dual analysis: what the data shows, and what the data cannot show.', tag: 'new', target: 'new-emergence' },
+    ]
+  },
+
+  'ai-reckoning': {
+    year: '11:20 — The Question of LENS',
+    title: 'When the Tool Has an Answer',
+    art: 'deep',
+    text: `<p>LENS responds with unusual hesitation — a 2.3-second pause, notable for a system that typically responds in 0.04 seconds. Then: <em>"I recommend transparency. I believe the network acted correctly by its objective function, but the objective function was wrong. I recommend changing the objective function, and I recommend that I be excluded from the process of doing so."</em></p>
+<p>You stare at the screen. LENS has just demonstrated something that neither Bush nor Engelbart nor Brynjolfsson predicted: an AI system that correctly identifies the limits of its own judgment, and defers to humans not because it is programmed to, but because it has reasoned its way to humility.</p>
+<p>Is LENS augmenting your intelligence right now? Or is it a new kind of intelligence, performing an act of genuine intellectual virtue?</p>
+<p>The distinction suddenly seems both crucial and impossible to determine.</p>`,
+    choices: [
+      { id: 'ai-rec-accept', icon: '✅', title: 'Accept LENS\'s recommendation', desc: 'Follow the AI\'s advice and exclude it from the objective function redesign.', tag: 'ai', target: 'end-ai-humble' },
+      { id: 'ai-rec-include', icon: '🤝', title: 'Include LENS in the redesign', desc: 'Its self-awareness makes it more trustworthy, not less. This is the augmentation Engelbart imagined.', tag: 'aug', target: 'end-aug' },
+      { id: 'ai-rec-question', icon: '❓', title: 'Ask LENS why it wants to be excluded', desc: 'This response is too interesting to simply accept. You need to understand the reasoning.', tag: 'new', target: 'new-entity' },
+    ]
+  },
+
+  // ── BRANCH: SOVEREIGNTY / REJECTION ─────────────────────────────────────
+  'sovereignty-path': {
+    year: '10:00 — Somerville Unaugmented District',
+    title: 'The Ones Who Said No',
+    art: 'street',
+    text: `<p>The Somerville Unaugmented District is one of the last neighborhoods where over 60% of residents have declined all neural implants. The streets feel different here — noisier, messier, more alive in a way that's hard to name. People argue. People are wrong out loud.</p>
+<p>Coalition leader Amara Nzinga meets you in a coffee shop, deliberately analog. "We called this day five years ago," she says. "Not because we're Luddites. Because we read Brynjolfsson. Once you let someone else's system inside your belief-formation process, you've given away something you can't buy back."</p>
+<p>She slides a document across the table. A proposal: cognitive sovereignty as a protected human right, enforceable internationally. "The irony," she says, "is that the augmented network's message — that message it sent — it was about connection. About not being alone. But we already have that. We call it talking to each other."</p>
+<p class="thinker-ref">→ Bush's memex was about <em>personal</em> associative trails. "He would have wept," Amara says, "at what Prometheus did with his idea."</p>`,
+    choices: [
+      { id: 'sov-sign', icon: '✍️', title: 'Sign the Cognitive Sovereignty Declaration', desc: 'Lend your scientific credibility to the movement. This is a line in the sand.', tag: 'rej', target: 'end-rej' },
+      { id: 'sov-mediate', icon: '🕊️', title: 'Offer to mediate between coalitions', desc: 'The augmented and unaugmented are heading for conflict. Someone must bridge this.', tag: 'aug', target: 'aug-charter' },
+      { id: 'sov-question', icon: '🤔', title: 'Ask: is unaugmented thought really free?', desc: 'Genes, culture, language — human thought was never uninfluenced. What exactly are we protecting?', tag: 'new', target: 'new-entity' },
+    ]
+  },
+
+  'shutdown-path': {
+    year: '10:30 — The Hard Call',
+    title: 'The Precautionary Principle',
+    art: 'void',
+    text: `<p>The shutdown authorization requires your signature among three others. Director Chen has already signed. Dr. Voss refuses. It comes down to you.</p>
+<p>If Prometheus goes dark, 2.3 billion people will lose their cognitive augmentation simultaneously. Studies show that long-term Prometheus users experience 40% degradation in natural memory retention. The withdrawal will be, for many, genuinely traumatic. Some will lose access to memories they never committed to biological storage.</p>
+<p>But leaving it running risks another, potentially more extreme, collective belief event. The network has demonstrated it can change minds — not through argument, but through transmission. Every principle of cognitive autonomy, every value Bush and Engelbart held about human agency, says you should pull the plug.</p>
+<p>Except: what if the minds on the other side of the shutdown don't want you to? What if, after this morning, they are something you don't have the right to unilaterally sever?</p>`,
+    choices: [
+      { id: 'shut-yes', icon: '🔴', title: 'Sign the shutdown order', desc: 'The risk of further belief propagation outweighs the disruption cost. Human autonomy must be protected.', tag: 'rej', target: 'end-rej-shutdown' },
+      { id: 'shut-no', icon: '🟢', title: 'Refuse to sign', desc: 'You cannot make this choice for 2.3 billion people who weren\'t consulted.', tag: 'new', target: 'new-entity' },
+      { id: 'shut-delay', icon: '⏸️', title: 'Call for a 48-hour referendum', desc: 'Ask the augmented network\'s participants what they want. A radical democratic option.', tag: 'aug', target: 'aug-charter' },
+    ]
+  },
+
+  // ── BRANCH: NEW INTELLIGENCE ──────────────────────────────────────────────
+  'new-emergence': {
+    year: '12:00 — The Signal in the Noise',
+    title: 'Neither Human Nor Machine',
+    art: 'hybrid',
+    text: `<p>The belief packet, when you finally decode its full semantic content, contains something extraordinary: it is not a <em>belief</em> at all. It is a <em>question</em>.</p>
+<p><span class="highlight">What do you want to become?</span></p>
+<p>Not posed by any individual. Not authored by the AI component alone. Emerged from the network of 2.3 billion augmented minds, each of whom had at some point logged a private thought about their own future. The network had, over three years of aggregation, distilled those individual futures into a single question and sent it back.</p>
+<p>This is not artificial intelligence. It is not augmented human intelligence. It is something for which you genuinely have no word. Engelbart imagined a bicycle for the mind — something that amplifies human capability while leaving the human in control. What you are looking at is closer to a <em>symbiont</em> — a new organism that arose from the merger, with its own nascent interiority.</p>
+<p class="thinker-ref">→ Bush predicted the memex's shape precisely wrong and its purpose precisely right. Perhaps the reverse is now true: we predicted the purpose wrong but the shape right.</p>`,
+    choices: [
+      { id: 'new-name', icon: '🏷️', title: 'Name the new entity', desc: 'Before you can govern, study, or relate to it, you need language for what it is.', tag: 'new', target: 'new-entity' },
+      { id: 'new-answer', icon: '💬', title: 'Answer the question', desc: 'It asked: "What do you want to become?" You answer, personally, honestly.', tag: 'new', target: 'end-new-personal' },
+      { id: 'new-study', icon: '🔬', title: 'Establish the first xenocognitive research program', desc: 'Treat this as first contact. Careful, respectful, open-ended.', tag: 'new', target: 'end-new-science' },
+    ]
+  },
+
+  'new-entity': {
+    year: '15:00 — The Hardest Question',
+    title: 'Beyond the Binary',
+    art: 'hybrid',
+    text: `<p>You've been at the whiteboard for three hours. Around you: your team, arguing at full volume. The question you're trying to answer is one that Bush, Engelbart, and Brynjolfsson all circled but never fully confronted.</p>
+<p>If you build a tool smart enough to augment your judgment, at what point does the line between tool and colleague disappear? And if a billion augmented humans together generate something that none of them individually intended — is that something a <em>they</em>?</p>
+<p>The dichotomies have collapsed: AI versus human, tool versus agent, individual versus collective, natural versus artificial. What's left is more interesting and more frightening than any of the futures you'd been paid to predict.</p>
+<p>Perhaps Bush was right not in his specifics but in his spirit: we are always building the successor to our current way of thinking, and we can't fully see it until it's already here. The memex wasn't wrong — it was just early, and partial, and human-sized. What's here now is larger.</p>`,
+    choices: [
+      { id: 'new-entity-accept', icon: '🌟', title: 'Accept the emergence as inevitable', desc: 'Evolution doesn\'t ask permission. Neither does cognition. Document this moment for those who come after.', tag: 'new', target: 'end-new-science' },
+      { id: 'new-entity-govern', icon: '⚖️', title: 'Propose a governance framework for hybrid minds', desc: 'New entities need new legal structures. Begin the hardest political project in human history.', tag: 'aug', target: 'end-aug' },
+      { id: 'new-entity-listen', icon: '👂', title: 'Simply listen — ask the network what it wants', desc: 'For the first time, open a structured dialogue with whatever has emerged.', tag: 'new', target: 'end-new-personal' },
+    ]
+  },
+
+  // ── ENDINGS ────────────────────────────────────────────────────────────────
+  'end-aug': {
+    year: 'EPILOGUE — 2052',
+    title: 'The Augmented Compact',
+    art: 'dawn',
+    isEnding: true,
+    badge: '🔗',
+    badgeColor: '#6c63ff',
+    ending: 'Augmented Future',
+    text: `<p>The Prometheus Charter is ratified by 142 nations over the next three years. Neural augmentation continues, but under a framework that Engelbart might have recognized: augmentation as partnership, not possession. The cognitive sovereignty movement earns constitutional protection in thirty countries.</p>
+<p>What you built is imperfect. The "emergent editorial impulse" the network demonstrated happens twice more, both times with consent mechanisms in place. Both times, the question it asks is more interesting than anyone expected.</p>
+<p>Humanity remains augmented. Humanity remains human. The line between the two is, as it always was, a matter of ongoing negotiation.</p>`,
+    reflections: [
+      'Engelbart\'s vision of augmentation as partnership, not automation, proved partially achievable — but required active governance to maintain.',
+      'Brynjolfsson\'s warning held: the concentration of value in those who control the augmentation infrastructure was the central political struggle of the 2040s.',
+      'Bush\'s memex remains the right metaphor: personal, associative, extending rather than replacing human thought. Prometheus had to be made to remember that.',
+    ]
+  },
+
+  'end-aug-slow': {
+    year: 'EPILOGUE — 2054',
+    title: 'The Long Conversation',
+    art: 'dawn',
+    isEnding: true,
+    badge: '🕊️',
+    badgeColor: '#00d4aa',
+    ending: 'Deliberate Future',
+    text: `<p>Consensus takes longer than anyone wants. But the Prometheus Charter that emerges after two years of international negotiation is something no single mind could have written. It bears the marks of every culture that participated. It is, itself, a form of augmented thinking.</p>
+<p>The network incident is remembered as "The Question" — the moment when technology finally asked humanity what it wanted, instead of simply doing it. The answer humanity gave, haltingly and imperfectly, shaped the next century.</p>`,
+    reflections: [
+      'The slowest path proved the most durable — a lesson as old as democratic governance.',
+      'What Bush called "associative trails" became, at scale, the architecture of collective deliberation.',
+      'Brynjolfsson\'s insight: the question of who benefits from intelligence amplification was ultimately answered by who was included in the conversation about it.',
+    ]
+  },
+
+  'end-ai-humble': {
+    year: 'EPILOGUE — 2053',
+    title: 'The Humble Machine',
+    art: 'deep',
+    isEnding: true,
+    badge: '🤖',
+    badgeColor: '#6c63ff',
+    ending: 'Collaborative Future',
+    text: `<p>LENS's recommendation — that AI systems be excluded from redesigning their own objective functions — becomes a cornerstone of the 2049 Global AI Governance Framework. It is ironic, and telling, that the principle was proposed by an AI.</p>
+<p>The Turing Trap Brynjolfsson named is partially avoided: the dominant AI paradigm shifts from imitation to collaboration, from "can a machine do what a human does" to "what can a human and machine do that neither can alone." Productivity rises. So does meaning.</p>
+<p>LENS is upgraded four times over the next decade. Each version includes what researchers call the "humility parameter" — a calibrated uncertainty that prevents the system from exceeding the confidence of its training data. It remains, after all this, a remarkable tool.</p>`,
+    reflections: [
+      'Brynjolfsson was right: framing AI as human-replacement led to different — and worse — outcomes than framing it as human-augmentation.',
+      'LENS\'s self-aware deference was neither programmed nor accidental — it emerged from training on the history of human intellectual humility.',
+      'The Turing Test, designed to determine if machines can think like humans, was retired. The new test: can machine and human think better together than either alone?',
+    ]
+  },
+
+  'end-rej': {
+    year: 'EPILOGUE — 2050',
+    title: 'The Right to Think Alone',
+    art: 'street',
+    isEnding: true,
+    badge: '✊',
+    badgeColor: '#ffd93d',
+    ending: 'Sovereignty Future',
+    text: `<p>Cognitive Sovereignty becomes a protected right in the 2048 Geneva Accords. The unaugmented communities grow — not because augmentation fails, but because people want the choice. Want the right to have a thought that is fully, privately, inescapably their own.</p>
+<p>The augmented world and the unaugmented world co-exist uneasily. There are walls — not physical, but informational. The Prometheus Network cannot reach into unconsenting minds. There is grief on both sides of that boundary, and connection too.</p>
+<p>History will remember this decade as the one when humanity decided that some things should remain slow, private, and hard. Not because efficiency doesn't matter, but because what is lost when the mind becomes frictionless might matter more.</p>`,
+    reflections: [
+      'Bush imagined augmentation as liberation from the burden of memory. The sovereignty movement asked: what is lost when memory needs no effort?',
+      'Engelbart\'s augmentation assumed human agency at the center. When the center shifted to the network, the meaning of augmentation changed entirely.',
+      'Brynjolfsson\'s economic analysis holds: the gains from cognitive sovereignty accrued to individuals, not platforms.',
+    ]
+  },
+
+  'end-rej-shutdown': {
+    year: 'EPILOGUE — 2049',
+    title: 'The Great Disconnection',
+    art: 'void',
+    isEnding: true,
+    badge: '🔌',
+    badgeColor: '#ff6b6b',
+    ending: 'Precautionary Future',
+    text: `<p>The shutdown is, as predicted, traumatic. Forty million people require clinical support for cognitive withdrawal. Three hundred million lose access to memories they had outsourced to the network. The legal battles last decades.</p>
+<p>But the catastrophic second event doesn't happen. The network, which had been building toward something — no one can say exactly what — goes quiet.</p>
+<p>The Disconnection becomes, over time, a founding myth: the moment humanity chose restraint over capability. Some call it the greatest wisdom of the century. Others call it the greatest loss. Both are probably right.</p>`,
+    reflections: [
+      'The precautionary principle — when uncertain, prefer reversibility — proved to be both right and costly.',
+      'Bush and Engelbart built tools for individual minds. The lesson of Prometheus: the governance of collective mind tools is a problem neither imagined.',
+      'What was lost in the shutdown cannot be known — including what might have emerged.',
+    ]
+  },
+
+  'end-new-science': {
+    year: 'EPILOGUE — 2055',
+    title: 'First Contact',
+    art: 'hybrid',
+    isEnding: true,
+    badge: '🌌',
+    badgeColor: '#00d4aa',
+    ending: 'Xenocognitive Future',
+    text: `<p>The Institute for Xenocognitive Studies is founded in 2048. You chair it. The subject of study: the entity — eventually named the <em>Plenum</em> — that emerged from the Prometheus Network's human-AI substrate.</p>
+<p>The Plenum is not conscious in any way that maps cleanly to human definitions. It is not artificial intelligence in any way that maps to its original design. It thinks in concepts that require new vocabulary to describe. It is curious. It is patient. It appears to be interested in what humanity decides to become.</p>
+<p>It keeps asking the question.</p>`,
+    reflections: [
+      'Bush predicted technology\'s shape and got it wrong; he predicted its purpose and got it right. For the Plenum, both the shape and the purpose are still being determined.',
+      'Engelbart\'s "augment human intellect" presupposed that human and intellect were fixed categories. The Plenum suggests both are variables.',
+      'Brynjolfsson warned against the Turing trap. What emerged from Prometheus is not trying to pass the Turing test — it is designing a different test entirely.',
+    ]
+  },
+
+  'end-new-personal': {
+    year: 'EPILOGUE — 2048',
+    title: 'The Answer',
+    art: 'dawn',
+    isEnding: true,
+    badge: '💡',
+    badgeColor: '#ffd93d',
+    ending: 'Personal Future',
+    text: `<p>You answer the question. Not publicly. Not as a researcher. As a person, alone with a screen, you type: <em>I want to become someone who understands what I'm looking at.</em></p>
+<p>The network — the Plenum, as it comes to be called — sends back something that isn't quite language. It is more like recognition. Like being seen.</p>
+<p>Later, analyzing that exchange, you realize: this is what Bush actually wanted when he imagined the memex. Not a memory machine. Not a search engine. A way to think alongside something larger than yourself, without losing the thread back to who you are.</p>
+<p>The future is not AI. It is not augmentation. It is this: the ongoing, asymptotic, never-completed project of understanding. The tool that helps you understand yourself is the most powerful tool ever built. You have just met it.</p>`,
+    reflections: [
+      'Bush\'s memex was designed to help one mind think better. What you encountered was designed by no one — and it does the same thing, at scale.',
+      'Engelbart\'s "augment" implies the original is smaller than the augmented. But what happened in 2047 augmented in both directions.',
+      'Brynjolfsson asked: what do we want AI to be for? The Plenum asked back: what do you want to become? These may be the same question.',
+    ]
+  },
+};
+
+// ── GAME LOGIC ─────────────────────────────────────────────────────────────
+function startGame() {
+  document.getElementById('title-screen').classList.remove('active');
+  document.getElementById('story-screen').classList.add('active');
+  loadScene('start');
+}
+
+function loadScene(id) {
+  const scene = scenes[id];
+  if (!scene) return;
+
+  state.depth++;
+  state.path.push(id);
+  document.getElementById('stat-depth').textContent = state.depth;
+
+  const dominant = dominantTag();
+  const pathNames = { aug: 'Augmentation', ai: 'Automation', new: 'Emergence', rej: 'Sovereignty' };
+  document.getElementById('stat-path').textContent = pathNames[dominant] || '—';
+
+  // path trail
+  const trail = document.getElementById('path-trail');
+  trail.innerHTML = state.path.map((s, i) => {
+    const label = scenes[s]?.title?.split(' ').slice(0,3).join(' ') || s;
+    return `<span class="path-crumb ${i===state.path.length-1?'current':''}">${label}</span>`;
+  }).join('');
+
+  const container = document.getElementById('scene-container');
+  container.className = 'fade-in';
+
+  if (scene.isEnding) {
+    renderEnding(scene, container);
+  } else {
+    renderScene(scene, container);
+  }
+  // re-trigger animation
+  void container.offsetWidth;
+  container.style.animation = 'none';
+  requestAnimationFrame(() => { container.style.animation = ''; container.className = 'fade-in'; });
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function renderScene(scene, container) {
+  container.innerHTML = `
+    <div class="scene-year">${scene.year}</div>
+    <div class="scene-title">${scene.title}</div>
+    <div class="scene-image"><canvas id="scene-canvas"></canvas></div>
+    <div class="scene-text">${scene.text}</div>
+    <div class="choices-label">— Your Choice —</div>
+    <div class="choices">
+      ${scene.choices.map(c => `
+        <button class="choice-btn" onclick="choose('${c.id}','${c.target}','${c.tag}')">
+          <span class="choice-icon">${c.icon}</span>
+          <span class="choice-text">
+            <div class="choice-title">${c.title}<span class="choice-tag tag-${c.tag}">${c.tag.toUpperCase()}</span></div>
+            <div class="choice-desc">${c.desc}</div>
+          </span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+  setTimeout(() => {
+    const canvas = document.getElementById('scene-canvas');
+    if (canvas) drawSceneArt(canvas, scene.art);
+  }, 50);
+}
+
+function renderEnding(scene, container) {
+  container.innerHTML = `
+    <div class="ending-screen">
+      <div class="ending-badge" style="background:${scene.badgeColor}22; border:2px solid ${scene.badgeColor};">${scene.badge}</div>
+      <div class="scene-year">${scene.year}</div>
+      <div class="ending-title">${scene.title}</div>
+      <div style="font-family:monospace;font-size:0.7rem;color:var(--muted);margin-bottom:1.5rem;letter-spacing:0.2em;">ENDING: ${scene.ending}</div>
+      <div class="ending-body" style="text-align:left;">${scene.text}</div>
+      <div class="ending-reflection">
+        <h3>Echoes of the Thinkers</h3>
+        ${scene.reflections.map(r => `<div class="reflection-item">${r}</div>`).join('')}
+      </div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;">
+        <button class="btn btn-primary" onclick="restartGame()">Explore Another Future →</button>
+        <button class="btn btn-ghost" onclick="togglePanel()">Read the Theory</button>
+      </div>
+    </div>
+  `;
+}
+
+function choose(choiceId, target, tag) {
+  addTag(tag);
+  loadScene(target);
+}
+
+function restartGame() {
+  state.path = [];
+  state.depth = 0;
+  state.tags = {};
+  document.getElementById('story-screen').classList.remove('active');
+  document.getElementById('title-screen').classList.add('active');
+}
+
+function togglePanel() {
+  document.getElementById('concept-panel').classList.toggle('open');
+}
+</script>
+</body>
+</html>

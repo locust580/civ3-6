@@ -14,3 +14,37 @@ This week, we first read a vision of augmentation from Vannevar Bush, MIT’s De
   intelligence a more unique thing than typical artificial intelligence. Perhaps make it a story driven game where the
    player has choices that allow exploration into some possible futures - some potential memex-like devices of our own
    futures. Make more options than just what I've given you - show me your creativity sonnet!
+
+Response:
+The Augmentation Question — 2047
+
+  A fully self-contained, GitHub Pages-ready story game (~1,100 lines, no dependencies). Here's what's in it:
+
+  Narrative premise: You're Dr. Selin Adeyemi-Park at the Institute for Cognitive Futures, 2047. The Prometheus neural
+  augmentation network (used by 2.3 billion people) just propagated a belief to every user simultaneously. The crisis
+  forces you to confront what intelligence actually is.
+
+  Branching structure — 4 major paths, 8 endings:
+
+  ┌─────────────────┬─────┬────────────────────────────────────────────────────────────────────┐
+  │      Path       │ Tag │                            Core tension                            │
+  ├─────────────────┼─────┼────────────────────────────────────────────────────────────────────┤
+  │ Augmentation    │ AUG │ Engelbart's vision realized — but who governs the collective mind? │
+  ├─────────────────┼─────┼────────────────────────────────────────────────────────────────────┤
+  │ Automation / AI │ AI  │ LENS, the analysis AI, demonstrates unexpected humility            │
+  ├─────────────────┼─────┼────────────────────────────────────────────────────────────────────┤
+  │ Emergence       │ NEW │ The network generated something that is neither human nor AI       │
+  ├─────────────────┼─────┼────────────────────────────────────────────────────────────────────┤
+  │ Sovereignty     │ REJ │ The unaugmented movement and the right to private thought          │
+  └─────────────────┴─────┴────────────────────────────────────────────────────────────────────┘
+
+  Endings include: The Augmented Compact, The Humble Machine, The Great Disconnection, First Contact (xenocognitive
+  studies), The Answer (personal), Cognitive Sovereignty, The Long Conversation, The Precautionary Future
+
+  Features:
+  - Animated starfield background + procedurally drawn scene illustrations (neural nets, DNA helixes, hybrid geometries,
+   voids)
+  - Path tracker + breadcrumb trail showing your choices
+  - Collapsible "Concepts" panel with Bush, Engelbart, and Brynjolfsson summaries
+  - Each ending reflects back on all three thinkers explicitly
+  - Every branch tag is tracked to show your dominant path tendency
